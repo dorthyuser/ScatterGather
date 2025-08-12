@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config_customer" doc:name="HTTP Listener config" doc:id="5a42aa55-dd4e-4baa-afd7-9f06f3438639" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<http:listener-config name="HTTP_Listener_configOrders" doc:name="HTTP Listener config" doc:id="efecb552-f706-4c80-8857-5d33d99d9490" >
+		<http:listener-connection host="0.0.0.0" port="8083" />
+	</http:listener-config>
+	<flow name="outboundFlow" doc:id="d2160d64-fcf3-48a3-bb6e-0dfa8a8a225d" >
+		<http:listener doc:name="Listener" doc:id="5510b272-f6a7-4d02-8d65-db675f1a6f24" config-ref="HTTP_Listener_config_customer" path="/customers"/>
+		<logger level="INFO" doc:name="Logger" doc:id="c8d737a2-cdb1-4d48-aa0f-d7f7031f61db" message='"Request Received to get customer details !!!"'/>
+		<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	"custId": 1,&#10;	"name": "John Dola",&#10;	"email": "john@dola.com",&#10;	"mobile": "0777777777"&#10;	&#10;}]' doc:name="Set Payload" doc:id="56b98295-c459-4434-99ad-7b358594390a" />
+	</flow>
+	<flow name="outboundFlowOrders" doc:id="0a5459fb-aa57-4624-9158-399ae6475e43" >
+		<http:listener doc:name="Listener" doc:id="a41c3ab0-ce35-4d6b-8851-2c4fbd584a7a" config-ref="HTTP_Listener_configOrders" path="/orders"/>
+		<logger level="INFO" doc:name="Logger" doc:id="5edee7e6-d407-45c1-aecd-482de5bca675" message='"Request received to get orders list"'/>
+		<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	"OrderId": 18798,&#10;	"ProductId": "NXZ09898",&#10;	"ProductName": "AI Bot",&#10;	"SKU": "sjhda8s"&#10;}]' doc:name="Set Payload" doc:id="a7d7705b-6c19-4317-9b9f-005c70b44d36" />
+	</flow>
+</mule>

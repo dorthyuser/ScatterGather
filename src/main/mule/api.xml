@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="7c9b7f5b-445e-4caf-92d3-c4d73f07d275" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configurationCustomer" doc:name="HTTP Request configuration" doc:id="8b49c857-4ac6-4b05-bd88-e2ecc18d7737" >
+		<http:request-connection host="localhost" port="8082" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="a0c964fe-ce61-4e0c-9cb3-6c1f770e6f35" >
+		<http:request-connection host="localhost" port="8083" />
+	</http:request-config>
+	<flow name="SGFlow" doc:id="db000272-bcec-4158-b249-7afe3b81b159" >
+		<http:listener doc:name="Listener" doc:id="8c761b08-9006-4673-9cdd-c1e2fdb759a3" config-ref="HTTP_Listener_config" path="/sg"/>
+		<logger level="INFO" doc:name="Logger" doc:id="977cd6ef-76cc-4411-803f-05977a7f0237" message='#["Message received ...." ++ now()]'/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="8ea90699-8a34-445b-b70e-f1cce0eb4dfb" >
+			<route >
+				<flow-ref doc:name="GetCustomerDetails Flow Reference" doc:id="aca2569b-93c4-4f3e-a8bd-883bae52f6ab" name="GetCustomeDetailsSub_Flow"/>
+			</route>
+			<route >
+				<flow-ref doc:name="GetOrderDetails Flow Reference" doc:id="e8ece91e-5448-49dd-b2bd-d45c35d2cbce" name="GetOrderDetailsSub_Flow"/>
+			</route>
+		</scatter-gather>
+		<set-payload value="#[%dw 2.0&#10;output application/json&#10;---&#10;payload[0].payload ++ payload[1].payload]" doc:name="Set Payload" doc:id="ce86b777-e0a9-464c-ba93-0f201de6e993" />
+		<logger level="INFO" doc:name="Logger" doc:id="244e486f-08b6-4a10-a0a1-9b7f77f79da8" message="After scatter gather #[payload[0].payload ++ payload[1].payload ]"/>
+	</flow>
+	<sub-flow name="GetCustomeDetailsSub_Flow" doc:id="37fb9289-a4ca-470f-a8c1-3fc082258a39" >
+		<http:request method="GET" doc:name="Request" doc:id="4ed18d1d-6b1d-4949-b6b9-8edd2f910917" config-ref="HTTP_Request_configurationCustomer" path="/customers"/>
+	</sub-flow>
+	<sub-flow name="GetOrderDetailsSub_Flow" doc:id="bb4c255a-c986-47b8-ab84-78dda5e6aa5c" >
+		<http:request method="GET" doc:name="Request" doc:id="eaed63ec-565b-4aae-8b7c-f62cbb5323a4" config-ref="HTTP_Request_configuration" path="/orders"/>
+	</sub-flow>
+</mule>
